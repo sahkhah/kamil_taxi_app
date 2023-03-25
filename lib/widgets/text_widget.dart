@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 Widget textWidget({
   required String text,
   double fontSize = 12,
+  Color? color,
   FontWeight fontWeight = FontWeight.normal,
 }) {
   return Text(

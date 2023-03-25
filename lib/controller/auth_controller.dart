@@ -15,42 +15,51 @@ import '../views/home_screen.dart';
 import 'package:path/path.dart' as Path;
 
 class AuthController extends GetxController {
-
-
   String userUid = ''; //storing userId
-
 
   var varId = ''; //verification code
 
-
   int? resendTokenId;
-
 
   bool phoneAuthCheck = false;
 
+  var isProfileUploading = false.obs;
 
-  bool profileUpload = false;
-
-
-  bool get isProfileUploading => profileUpload;
-
+  var isDecided = false;
 
   dynamic credentials;
 
+  RxList userCards = [].obs;
 
+  
 
-
-
-
-  set isProfileUploading(bool value) {
-    profileUpload = value;
+  storeUserCard(String number, String expiry, String cvv, String name) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cards')
+        .add({
+      'name': name,
+      'number': number,
+      'cvv': cvv,
+      'expiry': expiry,
+    });
   }
 
-
-
-
-
-
+  getUserCard() {
+    //fetch all the values that's associated with this particular user
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('users')
+        .snapshots()
+        .listen(
+      (event) {
+        userCards.value = event.docs;
+      },
+    );
+  }
 
   phoneAuth(String phone) async {
     try {
@@ -82,18 +91,6 @@ class AuthController extends GetxController {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
   verifyOtp(String otpNumber) async {
     log('Called');
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -107,16 +104,6 @@ class AuthController extends GetxController {
       decideRoute();
     });
   }
-
-
-
-
-
-
-
-
-
-
 
   decideRoute() {
     //Step 1- check user login
@@ -137,35 +124,16 @@ class AuthController extends GetxController {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
   var myUser = UserModel(
-          bAddress: null,
-          hAdrerss: null,
-          mallAddress: null,
-          name: null,
-          image: null)
-      .obs;
-
-
-
-
-
-
-
-
-
-
-
-
+    bAddress: null,
+    hAdrerss: null,
+    mallAddress: null,
+    name: null,
+    image: null,
+    businessAddress: null,
+    homeAddress: null,
+    shopAddress: null,
+  ).obs;
 
   getUserInfo() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -175,14 +143,6 @@ class AuthController extends GetxController {
       },
     );
   }
-
-
-
-
-
-
-
-
 
   Future<Prediction?> showGoogleAutoComplete(BuildContext context) async {
     Prediction? p = await PlacesAutocomplete.show(
@@ -201,14 +161,6 @@ class AuthController extends GetxController {
     return p;
   }
 
-
-
-
-
-
-
-
-
   uploadImage(File image) async {
     String imageUrl = '';
 
@@ -226,14 +178,6 @@ class AuthController extends GetxController {
     return imageUrl;
   }
 
-
-
-
-
-
-
-
-
   storeUserInfo(
     File? selectedImage,
     String name,
@@ -241,7 +185,7 @@ class AuthController extends GetxController {
     String business,
     String shop, {
     String url = '',
-    LatLng? homeLatlng,
+    LatLng? homeLatLng,
     LatLng? shoppingLatLng,
     LatLng? businessLatLng,
   }) async {
@@ -256,16 +200,16 @@ class AuthController extends GetxController {
       'home_address': home,
       'business_address': business,
       'shopping_address': shop,
+      'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
+      'shop_latlng':
+          GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
+      'business_latlng':
+          GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
     }).then((value) {
+      isProfileUploading(false);
       Get.to(() => const HomeScreen());
     });
   }
-
-
-
-
-
-
 
   Future<LatLng> buildLatLngFromAddress(String place) async {
     List<geoCoding.Location> locations =

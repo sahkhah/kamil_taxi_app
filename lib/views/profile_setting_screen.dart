@@ -217,6 +217,9 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                           businessController.text,
                           shopController.text,
                           url: authController.myUser.value.image ?? '',
+                          homeLatLng: homeAddress,
+                          shoppingLatLng: shopAddress,
+                          businessLatLng: businessAddress,
                         );
                       })),
               ],

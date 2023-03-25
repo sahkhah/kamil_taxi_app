@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:taxi/controller/auth_controller.dart';
 import 'package:taxi/views/profile_setting_screen.dart';
+import 'package:taxi/widgets/text_widget.dart';
 
 import '../utils/appColors.dart';
 
@@ -24,6 +25,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late LatLng destination;
   late LatLng source;
+
+  String? dropDownValue;
 
   final Set<Polyline> _polyLine = {};
   String? _mapStyle;
@@ -49,6 +52,254 @@ class _HomeScreenState extends State<HomeScreen> {
           points: [source, destination],
           color: AppColors.greyColor,
           width: 5,
+        ),
+      );
+
+      buildPaymentCardWidget() {
+        return Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/visa.png',
+                width: 40,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              DropdownButton<String>(
+                items: [
+                  
+                ],
+                value: dropDownValue,
+                icon: const Icon(Icons.keyboard_arrow_down),
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(),
+                onChanged: (String? value) {
+                  //This is called when the user selects an item
+                  setState(() {
+                    dropDownValue = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    buildSourceSheet() {
+      Get.bottomSheet(
+        Container(
+          width: Get.width,
+          height: Get.height * 0.5,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 10,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                'Select Your Location',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                'Home Address ',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              InkWell(
+                onTap: () async {
+                  Get.back();
+                  source = authController.myUser.value.homeAddress!;
+                  if (markers.length >= 2) {
+                    markers.remove(markers.length);
+                  }
+                  markers.add(
+                    Marker(
+                      markerId: MarkerId(authController.myUser.value.hAdrerss!),
+                      infoWindow: InfoWindow(
+                        title:
+                            'Source: ${authController.myUser.value.hAdrerss!}',
+                      ),
+                      position: source,
+                    ),
+                  );
+
+                  //await getPolyLines(source, destination);
+                  //drawPolyLine(sourcePlace);
+
+                  myMapController!.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: source,
+                        zoom: 14,
+                      ),
+                    ),
+                  );
+                  setState(() {
+                    //showSourceField = true;
+                  });
+
+                  // Get.back();
+
+                  buildRideConfirmationSheet();
+                },
+                child: Container(
+                  width: Get.width,
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        spreadRadius: 4,
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        authController.myUser.value.hAdrerss!,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Text(
+                authController.myUser.value.mallAddress!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                width: Get.width,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      spreadRadius: 4,
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      authController.myUser.value.bAddress!,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                onTap: () async {
+                  Get.back();
+                  //String= sourcePlace = await showGoogleAutoComplete();
+                  Prediction? p =
+                      await authController.showGoogleAutoComplete(context);
+                  String sourcePlace = p!.description!;
+                  sourceController.text = sourcePlace;
+                  /* List<geoCoding.Location> locations =
+                              await geoCoding.locationFromAddress(sourcePlace);
+                          source = LatLng(locations.first.latitude,
+                              locations.first.longitude); */
+                  /* source =
+                      await authController.buildLatLngFromAddress(sourcePlace);
+                  if (markers.length >= 2) {
+                    markers.remove(markers.length);
+                  }
+                  markers.add(
+                    Marker(
+                      markerId: MarkerId(sourcePlace),
+                      infoWindow: InfoWindow(
+                        title: 'Source: $sourcePlace',
+                      ),
+                      position: source,
+                    ),
+                  );
+                  drawPolyLine(sourcePlace);
+
+                  myMapController!.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: source,
+                        zoom: 14,
+                      ),
+                    ),
+                  );
+                  setState(() {
+                    showSourceField = true;
+                  }); */
+                },
+                child: Container(
+                  width: Get.width,
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white,
+                        blurRadius: 4,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Search for Address',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -245,176 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
             controller: sourceController,
             readOnly: true,
             onTap: () async {
-              Get.bottomSheet(
-                Container(
-                  width: Get.width,
-                  height: Get.height * 0.5,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Text(
-                        'Select Your Location',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Home Address ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        width: Get.width,
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              spreadRadius: 4,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: const [
-                            Text(
-                              'KOA, KOHAT',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Text(
-                        'Office Address ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        width: Get.width,
-                        height: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              spreadRadius: 4,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: const [
-                            Text(
-                              'Tahil, KOHAT',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          Get.back();
-                          //String= sourcePlace = await showGoogleAutoComplete();
-                          Prediction? p = await authController
-                              .showGoogleAutoComplete(context);
-                          String sourcePlace = p!.description!;
-                          sourceController.text = sourcePlace;
-                          /* List<geoCoding.Location> locations =
-                              await geoCoding.locationFromAddress(sourcePlace);
-                          source = LatLng(locations.first.latitude,
-                              locations.first.longitude); */
-                          source = await authController
-                              .buildLatLngFromAddress(sourcePlace);
-                          if (markers.length >= 2) {
-                            markers.remove(markers.length);
-                          }
-                          markers.add(
-                            Marker(
-                              markerId: MarkerId(sourcePlace),
-                              infoWindow: InfoWindow(
-                                title: 'Source: $sourcePlace',
-                              ),
-                              position: source,
-                            ),
-                          );
-                          drawPolyLine(sourcePlace);
-
-                          myMapController!.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                              CameraPosition(
-                                target: source,
-                                zoom: 14,
-                              ),
-                            ),
-                          );
-                          setState(() {
-                            showSourceField = true;
-                          });
-                        },
-                        child: Container(
-                          width: Get.width,
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white,
-                                blurRadius: 4,
-                                spreadRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Text(
-                            'Search for Address',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              buildSourceSheet();
             },
             style: GoogleFonts.poppins(
               fontSize: 14,
@@ -589,6 +671,159 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+void buildRideConfirmationSheet() {
+  Get.bottomSheet(
+    Container(
+      width: Get.width,
+      height: Get.height * 0.4,
+      padding: const EdgeInsets.only(
+        left: 20,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20),
+          topLeft: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: Container(
+              width: Get.width * 0.2,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          textWidget(
+              text: 'Select an option',
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
+          const SizedBox(
+            height: 20,
+          ),
+          buildDriverList(),
+          const SizedBox(
+            height: 20,
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Divider(),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: buildPaymentCardWidget(),
+                ),
+                MaterialButton(
+                  onPressed: () {},
+                  color: AppColors.greenColor,
+                  shape: const StadiumBorder(),
+                  child: textWidget(
+                    text: 'Confirm',
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+int selectedRide = 0;
+
+buildDriverList() {
+  return SizedBox(
+    height: 90,
+    width: Get.width,
+    child: StatefulBuilder(
+      builder: (context, setState) {
+        return ListView.builder(
+          itemBuilder: ((context, index) {
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  selectedRide = index;
+                });
+              },
+              child: buildDriverCard(selectedRide == index),
+            );
+          }),
+          itemCount: 3,
+          scrollDirection: Axis.horizontal,
+        );
+      },
+    ),
+  );
+}
+
+buildDriverCard(bool selected) {
+  return Container(
+    margin: const EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
+    height: 85,
+    width: 165,
+    decoration: BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: selected
+              ? const Color(0xff2DBB54).withOpacity(0.2)
+              : Colors.grey.withOpacity(0.2),
+          offset: const Offset(0, 5),
+          blurRadius: 5,
+          spreadRadius: 1,
+        ),
+      ],
+      borderRadius: BorderRadius.circular(12),
+      color: selected ? const Color(0xff2DBB54) : Colors.grey,
+    ),
+    child: Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(
+            left: 10,
+            top: 10,
+            bottom: 10,
+            right: 10,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              textWidget(
+                text: 'Standard',
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              )
+            ],
+          ),
+        ),
+        Positioned(
+          right: -20,
+          top: 0,
+          bottom: 0,
+          child: Image.asset('assets/Mask Group 2.png'),
+        ),
+      ],
+    ),
+  );
 }
 
 buildDrawerItem({
