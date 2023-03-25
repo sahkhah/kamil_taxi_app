@@ -52,7 +52,7 @@ class AuthController extends GetxController {
     FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('users')
+        .collection('cards')
         .snapshots()
         .listen(
       (event) {

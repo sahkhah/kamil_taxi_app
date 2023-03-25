@@ -1,7 +1,10 @@
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/credit_card_brand.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
+
+import '../utils/appColors.dart';
 
 void main() => runApp(AddPaymentCardScreen());
 
@@ -74,7 +77,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                   obscureCardNumber: true,
                   obscureCardCvv: true,
                   isHolderNameVisible: true,
-                  cardBgColor: AppColors.cardBgColor,
+                  cardBgColor: AppColors.blackColor,
                   backgroundImage:
                       useBackgroundImage ? 'assets/card_bg.png' : null,
                   isSwipeGestureEnabled: true,
@@ -116,7 +119,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                             focusedBorder: border,
                             enabledBorder: border,
                           ),
-                          expiryDateDecoration: InputDecoration(
+                            expiryDateDecoration: InputDecoration(
                             hintStyle: const TextStyle(color: Colors.white),
                             labelStyle: const TextStyle(color: Colors.white),
                             focusedBorder: border,
@@ -144,7 +147,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                         const SizedBox(
                           height: 20,
                         ),
-                        Padding(
+                        /*  Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -168,8 +171,8 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                               ),
                             ],
                           ),
-                        ),
-                        Padding(
+                        ), */
+                        /*  Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -186,14 +189,14 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                                 value: useBackgroundImage,
                                 inactiveTrackColor: Colors.grey,
                                 activeColor: Colors.white,
-                                activeTrackColor: AppColors.colorE5D1B2,
+                                activeTrackColor: AppColors.greyColor,
                                 onChanged: (bool value) => setState(() {
                                   useBackgroundImage = value;
                                 }),
                               ),
                             ],
                           ),
-                        ),
+                        ), */
                         const SizedBox(
                           height: 20,
                         ),
@@ -205,13 +208,11 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: <Color>[
-                                  AppColors.colorB58D67,
-                                  AppColors.colorB58D67,
-                                  AppColors.colorE5D1B2,
-                                  AppColors.colorF9EED2,
-                                  AppColors.colorFFFFFD,
-                                  AppColors.colorF9EED2,
-                                  AppColors.colorB58D67,
+                                  AppColors.greyColor,
+                                  AppColors.greyColor,
+                                  AppColors.greyColor,
+                                  AppColors.greyColor,
+                                  AppColors.greyColor,
                                 ],
                                 begin: Alignment(-1, -4),
                                 end: Alignment(1, 4),
@@ -247,6 +248,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
   void _onValidate() {
     if (formKey.currentState!.validate()) {
       print('valid!');
+      log('valid!');
     } else {
       print('invalid!');
     }

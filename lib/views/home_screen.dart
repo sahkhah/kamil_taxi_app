@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:taxi/controller/auth_controller.dart';
+import 'package:taxi/views/payment_screen.dart';
 import 'package:taxi/views/profile_setting_screen.dart';
 import 'package:taxi/widgets/text_widget.dart';
 
@@ -54,40 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 5,
         ),
       );
-
-      buildPaymentCardWidget() {
-        return Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/visa.png',
-                width: 40,
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              DropdownButton<String>(
-                items: [
-                  
-                ],
-                value: dropDownValue,
-                icon: const Icon(Icons.keyboard_arrow_down),
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(),
-                onChanged: (String? value) {
-                  //This is called when the user selects an item
-                  setState(() {
-                    dropDownValue = value;
-                  });
-                },
-              ),
-            ],
-          ),
-        );
-      }
     }
 
     buildSourceSheet() {
@@ -314,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .loadString('assets/map_style.txt')
           .then((value) => _mapStyle = value);
 
-      loadCustomMarker();
+      //loadCustomMarker();
     }
 
     Widget buildProfileTile() {
@@ -431,6 +398,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   LatLng(locations.first.latitude, locations.first.longitude); */
               destination =
                   await authController.buildLatLngFromAddress(selectedPlace);
+              // late Uint8List markIcons;
+              Uint8List markIcons = Uint8List(1);
               markers.add(
                 Marker(
                   icon: BitmapDescriptor.fromBytes(markIcons),
@@ -587,7 +556,11 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
                 children: [
-                  buildDrawerItem(title: 'Payment History', onPressed: () {}),
+                  buildDrawerItem(
+                      title: 'Payment History',
+                      onPressed: () {
+                        Get.to(() => const PaymentScreen());
+                      }),
                   buildDrawerItem(
                       title: 'Ride History', onPressed: () {}, isVisible: true),
                   buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
@@ -671,210 +644,209 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-void buildRideConfirmationSheet() {
-  Get.bottomSheet(
-    Container(
-      width: Get.width,
-      height: Get.height * 0.4,
-      padding: const EdgeInsets.only(
-        left: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          topLeft: Radius.circular(20),
+  buildRideConfirmationSheet() {
+    Get.bottomSheet(
+      Container(
+        width: Get.width,
+        height: Get.height * 0.4,
+        padding: const EdgeInsets.only(
+          left: 20,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 10,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
           ),
-          Center(
-            child: Container(
-              width: Get.width * 0.2,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 10,
+            ),
+            Center(
+              child: Container(
+                width: Get.width * 0.2,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          textWidget(
-              text: 'Select an option',
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
-          const SizedBox(
-            height: 20,
-          ),
-          buildDriverList(),
-          const SizedBox(
-            height: 20,
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Divider(),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: buildPaymentCardWidget(),
-                ),
-                MaterialButton(
-                  onPressed: () {},
-                  color: AppColors.greenColor,
-                  shape: const StadiumBorder(),
-                  child: textWidget(
-                    text: 'Confirm',
-                    color: Colors.white,
+            const SizedBox(
+              height: 20,
+            ),
+            textWidget(
+                text: 'Select an option',
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+            const SizedBox(
+              height: 20,
+            ),
+            buildDriverList(),
+            const SizedBox(
+              height: 20,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(right: 20),
+              child: Divider(),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: buildPaymentCardWidget(),
                   ),
-                ),
+                  MaterialButton(
+                    onPressed: () {},
+                    color: AppColors.greenColor,
+                    shape: const StadiumBorder(),
+                    child: textWidget(
+                      text: 'Confirm',
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int selectedRide = 0;
+
+  buildDriverList() {
+    return SizedBox(
+      height: 90,
+      width: Get.width,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return ListView.builder(
+            itemBuilder: ((context, index) {
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedRide = index;
+                  });
+                },
+                child: buildDriverCard(selectedRide == index),
+              );
+            }),
+            itemCount: 3,
+            scrollDirection: Axis.horizontal,
+          );
+        },
+      ),
+    );
+  }
+
+  buildDriverCard(bool selected) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
+      height: 85,
+      width: 165,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: selected
+                ? const Color(0xff2DBB54).withOpacity(0.2)
+                : Colors.grey.withOpacity(0.2),
+            offset: const Offset(0, 5),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
+        borderRadius: BorderRadius.circular(12),
+        color: selected ? const Color(0xff2DBB54) : Colors.grey,
+      ),
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.only(
+              left: 10,
+              top: 10,
+              bottom: 10,
+              right: 10,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                textWidget(
+                  text: 'Standard',
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                )
               ],
             ),
           ),
+          Positioned(
+            right: -20,
+            top: 0,
+            bottom: 0,
+            child: Image.asset('assets/Mask Group 2.png'),
+          ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
-int selectedRide = 0;
-
-buildDriverList() {
-  return SizedBox(
-    height: 90,
-    width: Get.width,
-    child: StatefulBuilder(
-      builder: (context, setState) {
-        return ListView.builder(
-          itemBuilder: ((context, index) {
-            return InkWell(
-              onTap: () {
-                setState(() {
-                  selectedRide = index;
-                });
-              },
-              child: buildDriverCard(selectedRide == index),
-            );
-          }),
-          itemCount: 3,
-          scrollDirection: Axis.horizontal,
-        );
-      },
-    ),
-  );
-}
-
-buildDriverCard(bool selected) {
-  return Container(
-    margin: const EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
-    height: 85,
-    width: 165,
-    decoration: BoxDecoration(
-      boxShadow: [
-        BoxShadow(
-          color: selected
-              ? const Color(0xff2DBB54).withOpacity(0.2)
-              : Colors.grey.withOpacity(0.2),
-          offset: const Offset(0, 5),
-          blurRadius: 5,
-          spreadRadius: 1,
-        ),
-      ],
-      borderRadius: BorderRadius.circular(12),
-      color: selected ? const Color(0xff2DBB54) : Colors.grey,
-    ),
-    child: Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.only(
-            left: 10,
-            top: 10,
-            bottom: 10,
-            right: 10,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              textWidget(
-                text: 'Standard',
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              )
-            ],
-          ),
-        ),
-        Positioned(
-          right: -20,
-          top: 0,
-          bottom: 0,
-          child: Image.asset('assets/Mask Group 2.png'),
-        ),
-      ],
-    ),
-  );
-}
-
-buildDrawerItem({
-  bool isVisible = false,
-  required String title,
-  double height = 45,
-  required Function onPressed,
-  Color color = Colors.black,
-  double fontSize = 20,
-  FontWeight fontWeight = FontWeight.w600,
-}) {
-  return SizedBox(
-    height: height,
-    child: ListTile(
-      contentPadding: const EdgeInsets.all(8),
-      dense: true,
-      onTap: () => onPressed(),
-      title: Row(
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              color: color,
+  buildDrawerItem({
+    bool isVisible = false,
+    required String title,
+    double height = 45,
+    required Function onPressed,
+    Color color = Colors.black,
+    double fontSize = 20,
+    FontWeight fontWeight = FontWeight.w600,
+  }) {
+    return SizedBox(
+      height: height,
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(8),
+        dense: true,
+        onTap: () => onPressed,
+        title: Row(
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                color: color,
+              ),
             ),
-          ),
-          const SizedBox(width: 5),
-          isVisible
-              ? CircleAvatar(
-                  backgroundColor: AppColors.greenColor,
-                  radius: 15,
-                  child: Text(
-                    '1',
-                    style: GoogleFonts.poppins(color: Colors.white),
-                  ),
-                )
-              : Container(),
-        ],
+            const SizedBox(width: 5),
+            isVisible
+                ? CircleAvatar(
+                    backgroundColor: AppColors.greenColor,
+                    radius: 15,
+                    child: Text(
+                      '1',
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  )
+                : Container(),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-late Uint8List markIcons;
+/* late Uint8List markIcons;
 
 loadCustomMarker() async {
   markIcons = await loadAsset('assets/dest_marker.png', 100);
-}
+} */
 
-Future<Uint8List> loadAsset(String path, int width) async {
+/* Future<Uint8List> loadAsset(String path, int width) async {
   ByteData data = await rootBundle.load(path);
   ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
       tergetHeight: width);
@@ -882,48 +854,81 @@ Future<Uint8List> loadAsset(String path, int width) async {
   return (await fi.image.toByteDAta(format: ui.ImageByteFormat.png))!
       .buffer
       .asUint8List();
-}
+} */
 
-Widget buildCurrentLocationIcon() {
-  return const Align(
-    alignment: Alignment.bottomRight,
-    child: CircleAvatar(
-      radius: 20,
-      backgroundColor: Colors.green,
-      child: Icon(
-        Icons.my_location,
-        color: Colors.white,
+  Widget buildCurrentLocationIcon() {
+    return const Align(
+      alignment: Alignment.bottomRight,
+      child: CircleAvatar(
+        radius: 20,
+        backgroundColor: Colors.green,
+        child: Icon(
+          Icons.my_location,
+          color: Colors.white,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget buildBottomSheet() {
-  return Align(
-    alignment: Alignment.bottomCenter,
-    child: Container(
-      width: Get.width * 0.8,
-      height: 25,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            spreadRadius: 4,
-            blurRadius: 10,
+  Widget buildBottomSheet() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: Get.width * 0.8,
+        height: 25,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              spreadRadius: 4,
+              blurRadius: 10,
+            ),
+          ],
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8.0),
+          ),
+        ),
+        child: Center(
+          child: Container(
+            width: Get.width * 0.6,
+            height: 4,
+            color: Colors.black54,
+          ),
+        ),
+      ),
+    );
+  }
+
+  buildPaymentCardWidget() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/visa.png',
+            width: 40,
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          DropdownButton<String>(
+            items: const [],
+            value: dropDownValue,
+            icon: const Icon(Icons.keyboard_arrow_down),
+            elevation: 16,
+            style: const TextStyle(color: Colors.deepPurple),
+            underline: Container(),
+            onChanged: (String? value) {
+              //This is called when the user selects an item
+              setState(() {
+                dropDownValue = value;
+              });
+            },
           ),
         ],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8.0),
-        ),
       ),
-      child: Center(
-        child: Container(
-          width: Get.width * 0.6,
-          height: 4,
-          color: Colors.black54,
-        ),
-      ),
-    ),
-  );
+    );
+  }
 }

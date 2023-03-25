@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_credit_card/credit_card_brand.dart';
+import 'package:flutter_credit_card/credit_card_widget.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taxi/views/add_payment_card.dart';
 import 'package:taxi/widgets/green_intro_widget_without_logo.dart';
 
 import '../controller/auth_controller.dart';
+import '../utils/appColors.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -84,22 +87,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       } catch (e) {
                         cvvCode = '';
                       }
-
-                      return creditCardWidget(
-                          cardBgColor: Colors.black,
-                          cardNumber: cardNumber,
-                          expiryDate: expiryDate,
-                          cardHolderName: cardHolderName,
-                          cvvCode: cvvCode,
-                          bankName: '',
-                          showBackView: isCvvFocused,
-                          obscureCardNumber: true,
-                          isHolderNameVisible: true,
-                          isSwipeGestureEnabled: true,
-                          onCreditCardWidgetChange:
-                              (CreditCardBrand creditCardBrand) {});
+                      return CreditCardWidget(
+                        cardNumber: cardNumber,
+                        expiryDate: expiryDate,
+                        cardHolderName: cardHolderName,
+                        cvvCode: cvvCode,
+                        showBackView: isCvvFocused,
+                        obscureCardNumber: true,
+                        obscureCardCvv: true,
+                        isHolderNameVisible: true,
+                        cardBgColor: AppColors.blackColor,
+                        isSwipeGestureEnabled: true,
+                        onCreditCardWidgetChange:
+                            (CreditCardBrand creditCardBrand) {},
+                      );
+                      itemCount:
+                      authController.userCards.value.length;
                     }),
-                    itemCount: authController.userCards.length,
                   )),
             ),
           ),
@@ -119,7 +123,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               FloatingActionButton(
                 onPressed: () {
-                  Get.to(() => const AddPaymentCardScreen());
+                  Get.to(() => AddPaymentCardScreen());
                 },
                 child: const Icon(
                   Icons.arrow_forward,
@@ -132,18 +136,4 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
-
-  creditCardWidget(
-      {required Color cardBgColor,
-      required String cardNumber,
-      required String expiryDate,
-      required cardHolderName,
-      required String cvvCode,
-      required String bankName,
-      required bool showBackView,
-      required bool obscureCardNumber,
-      required bool isHolderNameVisible,
-      required bool isSwipeGestureEnabled,
-      required Null Function(dynamic creditCardBrand)
-          onCreditCardWidgetChange}) {}
 }

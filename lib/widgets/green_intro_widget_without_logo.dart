@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
- Widget greenIntroWidgetWithoutLogo() {
+ Widget greenIntroWidgetWithoutLogo({String? title}) {
     return Container(
       decoration: const BoxDecoration(
           image: DecorationImage(

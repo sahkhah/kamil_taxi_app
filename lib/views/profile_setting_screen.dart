@@ -197,7 +197,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                 const SizedBox(
                   height: 30,
                 ),
-                Obx(() => authController.isProfileUploading
+                Obx(() => authController.isProfileUploading(true)
                     ? const Center(
                         child: CircularProgressIndicator(),
                       )
