@@ -1,5 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.taxi">
+<manifest xmlns:android="hcom.khamill.taxittp://schemas.android.com/apk/res/android"
+    package="">
    <application
         android:label="taxi"
         android:name="${applicationName}"

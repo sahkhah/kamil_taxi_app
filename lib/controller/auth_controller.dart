@@ -9,6 +9,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:taxi/model/user_model/user_model.dart';
+import 'package:taxi/views/driver/car_registration/car_registration_template.dart';
+import 'package:taxi/views/driver/driver_profile_setup.dart';
 import 'package:taxi/views/profile_setting_screen.dart';
 import 'package:geocoding/geocoding.dart' as geoCoding;
 import '../views/home_screen.dart';
@@ -31,7 +33,8 @@ class AuthController extends GetxController {
 
   RxList userCards = [].obs;
 
-  
+//check whether the user is a driver or a user
+  bool isLoginAsDriver = false;
 
   storeUserCard(String number, String expiry, String cvv, String name) async {
     await FirebaseFirestore.instance
@@ -43,7 +46,7 @@ class AuthController extends GetxController {
       'number': number,
       'cvv': cvv,
       'expiry': expiry,
-    });
+    }).then((value) => print(value));
   }
 
   getUserCard() {
@@ -110,17 +113,30 @@ class AuthController extends GetxController {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       //Step 2- check whether the user profile exists
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get()
-          .then((value) {
-        if (value.exists) {
-          Get.to(() => const HomeScreen());
-        } else {
-          Get.to(() => const ProfileSettingScreen());
-        }
-      });
+      if (isLoginAsDriver) {
+      } else {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get()
+            .then((value) {
+          //if isLoginAsDriver == true, navigate to the driver module
+          if (isLoginAsDriver) {
+            if (value.exists) {
+              print('Driver Home Screen');
+              //Get.offAll(() => const HomeScreen());
+            } else {
+              Get.offAll(() => const DriverProfileSetup());
+            }
+          } else {
+            if (value.exists) {
+              Get.to(() => const HomeScreen());
+            } else {
+              Get.to(() => const ProfileSettingScreen());
+            }
+          }
+        });
+      }
     }
   }
 
@@ -209,6 +225,58 @@ class AuthController extends GetxController {
       isProfileUploading(false);
       Get.to(() => const HomeScreen());
     });
+  }
+
+  storeUserInfoForDriverScreen(
+    File? selectedImage,
+    String name,
+    String email, {
+    bool isDriver = false,
+    String url = '',
+    LatLng? homeLatLng,
+    LatLng? shoppingLatLng,
+    LatLng? businessLatLng,
+  }) async {
+    String urlNew = url;
+    if (selectedImage != null) {
+      urlNew = await uploadImage(selectedImage);
+    }
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).set(
+        {
+          'image': urlNew,
+          'name': name,
+          'email': email,
+          'isDriver': true,
+          'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
+          'shop_latlng':
+              GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
+          'business_latlng':
+              GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
+        },
+        SetOptions(
+          merge: true,
+        )).then((value) {
+      isProfileUploading(false);
+      //Get.off is equivalent to Navigation.pushReplacement()
+      Get.off(() => const CarRegistrationTemplatee());
+      //Get.to(() => const HomeScreen());
+    });
+  }
+
+  //var isCarEntryUploading = false.obs;
+  Future<bool> uploadCarEntry(Map<String, dynamic> carData) async {
+    //isCarEntryUploading(true);
+    bool isUploaded = false;
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).set(
+        carData,
+        SetOptions(
+            merge:
+                true)); //SetOptions is used so as to save the previous data as well as the new datas
+    isUploaded = true;
+    //isCarEntryUploading(false);
+    return isUploaded;
   }
 
   Future<LatLng> buildLatLngFromAddress(String place) async {
